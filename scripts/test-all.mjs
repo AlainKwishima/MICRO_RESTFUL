@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { platform } from 'node:os';
 
 const rootDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(rootDir, '..');
@@ -27,11 +28,15 @@ function run(command, args, cwd) {
   return spawnSync(command, args, {
     cwd: join(repoRoot, cwd),
     stdio: 'inherit',
-    shell: true,
+    shell: false,
   });
 }
 
-const sharedBuild = run('npm', ['run', 'build', '-w', 'packages/shared'], '.');
+const isWindows = platform() === 'win32';
+const npmCommand = isWindows ? 'cmd.exe' : 'npm';
+const npmArgs = (args) => (isWindows ? ['/c', 'npm', ...args] : args);
+
+const sharedBuild = run(npmCommand, npmArgs(['run', 'build', '-w', 'packages/shared']), '.');
 sharedBuilt = sharedBuild.status === 0;
 
 if (!sharedBuilt) {
@@ -39,7 +44,7 @@ if (!sharedBuilt) {
 }
 
 for (const workspace of workspaces) {
-  const result = run('npm', ['test'], workspace);
+  const result = run(npmCommand, npmArgs(['test']), workspace);
 
   if (result.status !== 0) {
     failures.push(workspace);

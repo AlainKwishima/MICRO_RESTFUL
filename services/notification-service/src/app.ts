@@ -74,10 +74,10 @@ async function trySendEmail(notification: Notification, metadata?: Record<string
     subject: notification.subject,
     htmlContent: notification.body,
   };
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
 
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
     const response = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: {
@@ -87,11 +87,12 @@ async function trySendEmail(notification: Notification, metadata?: Record<string
       body: JSON.stringify(payload),
       signal: controller.signal,
     });
-    clearTimeout(timeout);
     return response.ok;
   } catch (error) {
     console.error('[notification-service] Brevo send failed:', notification.id, notification.userId, error);
     return false;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -149,10 +150,7 @@ app.post(
 
     notifications.updateById(notification.id, (entry) => ({ ...entry, body: html, updatedAt: new Date() }));
 
-    const sent = await Promise.race([
-      trySendEmail(notification, req.body.metadata),
-      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 10000)),
-    ]);
+    const sent = await trySendEmail(notification, req.body.metadata);
 
     if (sent) {
       notifications.updateById(notification.id, (entry) => ({

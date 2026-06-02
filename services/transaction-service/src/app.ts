@@ -75,14 +75,21 @@ const validate = (schema: z.ZodTypeAny, target: 'body' | 'params' | 'query' = 'b
 };
 
 async function validateReference(url: string, serviceName: string) {
-  const result = await requestJson(url, { timeoutMs: 5000, serviceName });
-  if (!result.ok) {
-    throw new AppError(`${serviceName} validation failed`, 422);
+  try {
+    const result = await requestJson(url, { timeoutMs: 5000, serviceName });
+    if (!result.ok) {
+      throw new AppError(`${serviceName} validation failed`, 422);
+    }
+    return result.data as {
+      success?: boolean;
+      data?: { id: string; firstName?: string; lastName?: string; name?: string; email?: string };
+    };
+  } catch (error) {
+    if (error instanceof AppError && error.statusCode === 502) {
+      throw new AppError(`${serviceName} validation failed`, 422, error.errors);
+    }
+    throw error;
   }
-  return result.data as {
-    success?: boolean;
-    data?: { id: string; firstName?: string; lastName?: string; name?: string; email?: string };
-  };
 }
 
 async function sendNotification(transaction: Transaction, user: { firstName?: string; lastName?: string; email?: string }, resourceName: string) {

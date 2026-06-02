@@ -23,17 +23,24 @@ type ListResponse<T> = {
 };
 
 async function fetchList<T>(url: string, authorization: string | undefined, serviceName: string) {
-  const response = await requestJson<ListResponse<T>>(url, {
-    headers: authorization ? { authorization } : {},
-    timeoutMs: 5000,
-    serviceName,
-  });
+  try {
+    const response = await requestJson<ListResponse<T>>(url, {
+      headers: authorization ? { authorization } : {},
+      timeoutMs: 5000,
+      serviceName,
+    });
 
-  if (!response.ok || !response.data) {
-    throw new AppError(`${serviceName} unavailable`, 503);
+    if (!response.ok || !response.data) {
+      throw new AppError(`${serviceName} unavailable`, 503);
+    }
+
+    return response.data;
+  } catch (error) {
+    if (error instanceof AppError && error.statusCode === 502) {
+      throw new AppError(`${serviceName} unavailable`, 503, error.errors);
+    }
+    throw error;
   }
-
-  return response.data;
 }
 
 const app = express();

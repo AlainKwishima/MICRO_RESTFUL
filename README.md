@@ -1,6 +1,6 @@
 # Institution Management Starter Kit
 
-This repository is being migrated from a single Express app into a microservices architecture.
+This repository is implemented as a microservices-based institution management platform.
 
 ## Architecture
 
@@ -47,3 +47,15 @@ Run all workspace tests:
 npm run test:all
 ```
 
+## Service Guides
+
+- [API Gateway](./services/api-gateway/README.md)
+- [Auth Service](./services/auth-service/README.md)
+- [User Service](./services/user-service/README.md)
+- [Role Service](./services/role-service/README.md)
+- [Department Service](./services/department-service/README.md)
+- [Resource Service](./services/resource-service/README.md)
+- [Transaction Service](./services/transaction-service/README.md)
+- [Notification Service](./services/notification-service/README.md)
+- [Report Service](./services/report-service/README.md)
+- [Dashboard Service](./services/dashboard-service/README.md)
