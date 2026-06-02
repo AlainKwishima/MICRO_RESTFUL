@@ -13,6 +13,7 @@ const schema = z.object({
   BREVO_SENDER_EMAIL: z.string().email(),
   BREVO_SENDER_NAME: z.string().min(1),
   NOTIFICATION_SERVICE_URL: z.string().url().optional(),
+  DISABLE_SWAGGER: z.enum(['true', 'false']).default('false'),
 });
 
 export const env = loadEnv('auth-service', schema);

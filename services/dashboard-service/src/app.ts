@@ -9,6 +9,8 @@ import {
   requestJson,
   sendError,
   sendSuccess,
+  mountSwagger,
+  dashboardOpenApi,
 } from '@shared/lib';
 import { env } from './config/env';
 
@@ -77,6 +79,12 @@ app.get(
     sendSuccess(res, payload, 'Dashboard summary retrieved successfully');
   }),
 );
+
+mountSwagger(app, {
+  serviceName: 'dashboard-service',
+  spec: dashboardOpenApi,
+  disabled: env.DISABLE_SWAGGER === 'true',
+});
 
 app.use((_req, res) => sendError(res, 'Route not found', 404));
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

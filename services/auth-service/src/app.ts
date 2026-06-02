@@ -15,6 +15,8 @@ import {
   requestJson,
   sendError,
   sendSuccess,
+  mountSwagger,
+  authOpenApi,
 } from '@shared/lib';
 import { env } from './config/env';
 import { z } from 'zod';
@@ -310,6 +312,12 @@ app.post(
     );
   }),
 );
+
+mountSwagger(app, {
+  serviceName: 'auth-service',
+  spec: authOpenApi,
+  disabled: env.DISABLE_SWAGGER === 'true',
+});
 
 app.use((_req, res) => sendError(res, 'Route not found', 404));
 

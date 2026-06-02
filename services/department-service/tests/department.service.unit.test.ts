@@ -10,7 +10,7 @@ describe('department-service', () => {
   beforeAll(async () => {
     process.env.PORT = '3004';
     process.env.NODE_ENV = 'test';
-    process.env.DATABASE_URL = 'postgresql://postgres:postgres@localhost:5432/test?schema=departments';
+    process.env.DATABASE_URL = 'postgresql://postgres:mukabareke@localhost:5432/test?schema=departments';
     process.env.JWT_SECRET = 'd'.repeat(32);
 
     const app = require('../src/app').default;

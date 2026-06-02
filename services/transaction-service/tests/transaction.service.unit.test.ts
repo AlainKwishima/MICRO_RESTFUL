@@ -13,7 +13,7 @@ describe('transaction-service', () => {
   beforeAll(async () => {
     process.env.PORT = '3006';
     process.env.NODE_ENV = 'test';
-    process.env.DATABASE_URL = 'postgresql://postgres:postgres@localhost:5432/test?schema=transactions';
+    process.env.DATABASE_URL = 'postgresql://postgres:mukabareke@localhost:5432/test?schema=transactions';
     process.env.JWT_SECRET = 't'.repeat(32);
     process.env.USER_SERVICE_URL = 'http://user-service.test';
     process.env.RESOURCE_SERVICE_URL = 'http://resource-service.test';

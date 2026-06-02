@@ -20,11 +20,19 @@ This repository is implemented as a microservices-based institution management p
 ## Run
 
 ```bash
-cp .env.example .env
-docker compose up --build
+npm install
+cp .env.example .env   # set JWT_SECRET and POSTGRES_PASSWORD (default: mukabareke)
+docker compose up --build -d
+npm run smoke:e2e      # optional: verify gateway + auth + core APIs
 ```
 
 The gateway is available at `http://localhost:3000`.
+
+**Swagger UI:** [http://localhost:3000/api-docs](http://localhost:3000/api-docs) (aggregated API for all services). Set `DISABLE_SWAGGER=true` to disable.
+
+**Default admin:** `admin@institution.local` / `Admin123!`
+
+See [SETUP.md](./SETUP.md) for full installation, configuration, validation notes, and troubleshooting.
 
 ## API Routing
 

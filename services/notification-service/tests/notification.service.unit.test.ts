@@ -14,7 +14,7 @@ describe('notification-service', () => {
   beforeAll(async () => {
     process.env.PORT = '3007';
     process.env.NODE_ENV = 'test';
-    process.env.DATABASE_URL = 'postgresql://postgres:postgres@localhost:5432/test?schema=notifications';
+    process.env.DATABASE_URL = 'postgresql://postgres:mukabareke@localhost:5432/test?schema=notifications';
     process.env.BREVO_API_KEY = 'test-key';
     process.env.BREVO_SENDER_EMAIL = 'no-reply@example.com';
     process.env.BREVO_SENDER_NAME = 'Institution Starter Kit';

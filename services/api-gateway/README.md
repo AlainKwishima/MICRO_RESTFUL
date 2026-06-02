@@ -6,7 +6,8 @@
 ## Endpoints
 
 - `GET /health`
-- `GET /api-docs` when implemented by downstream aggregation
+- `GET /api-docs` — aggregated Swagger UI (all microservices)
+- `GET /api-docs.json` — aggregated OpenAPI 3.0 specification
 
 ## Environment
 

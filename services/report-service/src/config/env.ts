@@ -9,6 +9,7 @@ const schema = z.object({
   RESOURCE_SERVICE_URL: z.string().url(),
   TRANSACTION_SERVICE_URL: z.string().url(),
   DEPARTMENT_SERVICE_URL: z.string().url(),
+  DISABLE_SWAGGER: z.enum(['true', 'false']).default('false'),
 });
 
 export const env = loadEnv('report-service', schema);

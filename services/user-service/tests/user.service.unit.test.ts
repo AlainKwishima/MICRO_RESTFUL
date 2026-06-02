@@ -11,7 +11,7 @@ describe('user-service', () => {
   beforeAll(async () => {
     process.env.PORT = '3002';
     process.env.NODE_ENV = 'test';
-    process.env.DATABASE_URL = 'postgresql://postgres:postgres@localhost:5432/test?schema=users';
+    process.env.DATABASE_URL = 'postgresql://postgres:mukabareke@localhost:5432/test?schema=users';
     process.env.JWT_SECRET = 'y'.repeat(32);
 
     const app = require('../src/app').default;

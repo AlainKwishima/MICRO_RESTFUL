@@ -9,6 +9,8 @@ import {
   requestJson,
   sendError,
   sendSuccess,
+  mountSwagger,
+  reportOpenApi,
 } from '@shared/lib';
 import { env } from './config/env';
 
@@ -147,6 +149,12 @@ app.get(
     }, 'Department report generated successfully');
   }),
 );
+
+mountSwagger(app, {
+  serviceName: 'report-service',
+  spec: reportOpenApi,
+  disabled: env.DISABLE_SWAGGER === 'true',
+});
 
 app.use((_req, res) => sendError(res, 'Route not found', 404));
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

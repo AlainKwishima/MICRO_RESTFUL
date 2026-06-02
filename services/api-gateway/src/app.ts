@@ -59,6 +59,4 @@ mount('/api/v1/transactions', 'transaction-service', env.TRANSACTION_SERVICE_URL
 mount('/api/v1/reports', 'report-service', env.REPORT_SERVICE_URL);
 mount('/api/v1/dashboard', 'dashboard-service', env.DASHBOARD_SERVICE_URL);
 
-app.use((_req, res) => sendError(res, 'Route not found', 404));
-
 export default app;

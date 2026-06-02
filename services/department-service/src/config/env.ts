@@ -6,6 +6,7 @@ const schema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   DATABASE_URL: z.string().min(1),
   JWT_SECRET: z.string().min(32),
+  DISABLE_SWAGGER: z.enum(['true', 'false']).default('false'),
 });
 
 export const env = loadEnv('department-service', schema);

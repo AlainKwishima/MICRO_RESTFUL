@@ -12,7 +12,7 @@ describe('auth-service', () => {
   beforeAll(async () => {
     process.env.PORT = '3001';
     process.env.NODE_ENV = 'test';
-    process.env.DATABASE_URL = 'postgresql://postgres:postgres@localhost:5432/test?schema=auth';
+    process.env.DATABASE_URL = 'postgresql://postgres:mukabareke@localhost:5432/test?schema=auth';
     process.env.JWT_SECRET = 'x'.repeat(32);
     process.env.JWT_ACCESS_EXPIRY = '15m';
     process.env.JWT_REFRESH_EXPIRY = '7d';

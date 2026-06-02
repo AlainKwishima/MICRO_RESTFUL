@@ -9,6 +9,7 @@ const schema = z.object({
   BREVO_SENDER_EMAIL: z.string().email(),
   BREVO_SENDER_NAME: z.string().min(1),
   CLIENT_URL: z.string().min(1),
+  DISABLE_SWAGGER: z.enum(['true', 'false']).default('false'),
 });
 
 export const env = loadEnv('notification-service', schema);

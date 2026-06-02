@@ -13,6 +13,8 @@ const schema = z.object({
   NOTIFICATION_SERVICE_URL: z.string().url(),
   REPORT_SERVICE_URL: z.string().url(),
   DASHBOARD_SERVICE_URL: z.string().url(),
+  PUBLIC_GATEWAY_URL: z.string().url().default('http://localhost:3000'),
+  DISABLE_SWAGGER: z.enum(['true', 'false']).default('false'),
 });
 
 export const env = loadEnv('api-gateway', schema);

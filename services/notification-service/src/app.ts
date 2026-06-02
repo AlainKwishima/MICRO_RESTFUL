@@ -8,6 +8,8 @@ import {
   createMemoryStore,
   sendError,
   sendSuccess,
+  mountSwagger,
+  notificationOpenApi,
 } from '@shared/lib';
 import { env } from './config/env';
 import {
@@ -168,6 +170,12 @@ app.post(
     );
   }),
 );
+
+mountSwagger(app, {
+  serviceName: 'notification-service',
+  spec: notificationOpenApi,
+  disabled: env.DISABLE_SWAGGER === 'true',
+});
 
 app.use((_req, res) => sendError(res, 'Route not found', 404));
 

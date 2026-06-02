@@ -15,6 +15,8 @@ import {
   sendError,
   sendSuccess,
   uuidParamSchema,
+  mountSwagger,
+  transactionOpenApi,
 } from '@shared/lib';
 import { env } from './config/env';
 import { z } from 'zod';
@@ -216,6 +218,12 @@ app.delete(
     sendSuccess(res, null, 'Transaction deleted successfully');
   }),
 );
+
+mountSwagger(app, {
+  serviceName: 'transaction-service',
+  spec: transactionOpenApi,
+  disabled: env.DISABLE_SWAGGER === 'true',
+});
 
 app.use((_req, res) => sendError(res, 'Route not found', 404));
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

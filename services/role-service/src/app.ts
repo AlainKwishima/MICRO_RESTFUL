@@ -16,6 +16,8 @@ import {
   sendSuccess,
   uuidParamSchema,
   authenticate,
+  mountSwagger,
+  roleOpenApi,
 } from '@shared/lib';
 import { env } from './config/env';
 import { z } from 'zod';
@@ -91,6 +93,12 @@ app.delete('/api/v1/roles/:id', authenticate, authorise('Admin'), validate(uuidP
   if (!roles.deleteById(req.params.id)) throw new AppError('Role not found', 404);
   sendSuccess(res, null, 'Role deleted successfully');
 }));
+
+mountSwagger(app, {
+  serviceName: 'role-service',
+  spec: roleOpenApi,
+  disabled: env.DISABLE_SWAGGER === 'true',
+});
 
 app.use((_req, res) => sendError(res, 'Route not found', 404));
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

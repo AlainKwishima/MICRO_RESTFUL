@@ -18,6 +18,8 @@ import {
   sendSuccess,
   uuidParamSchema,
   authenticate,
+  mountSwagger,
+  userOpenApi,
 } from '@shared/lib';
 import { env } from './config/env';
 import { z } from 'zod';
@@ -196,6 +198,12 @@ app.delete(
     sendSuccess(res, null, 'User deleted successfully');
   }),
 );
+
+mountSwagger(app, {
+  serviceName: 'user-service',
+  spec: userOpenApi,
+  disabled: env.DISABLE_SWAGGER === 'true',
+});
 
 app.use((_req, res) => sendError(res, 'Route not found', 404));
 

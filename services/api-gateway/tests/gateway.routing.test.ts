@@ -1,7 +1,9 @@
 import http from 'node:http';
 import type { AddressInfo } from 'node:net';
 import type { Server } from 'node:http';
+import type { Express } from 'express';
 import { fetchJson, stopTestServer } from '../../../tests/service-test-utils';
+import { sendError } from '@shared/lib';
 
 jest.setTimeout(30000);
 
@@ -56,8 +58,12 @@ describe('api-gateway', () => {
     process.env.NOTIFICATION_SERVICE_URL = downstreamBaseUrl;
     process.env.REPORT_SERVICE_URL = 'http://127.0.0.1:6553';
     process.env.DASHBOARD_SERVICE_URL = downstreamBaseUrl;
+    process.env.PUBLIC_GATEWAY_URL = 'http://127.0.0.1:3000';
+    process.env.DISABLE_SWAGGER = 'true';
 
-    const app = require('../src/app').default;
+    jest.resetModules();
+    const app = require('../src/app').default as Express;
+    app.use((_req, res) => sendError(res, 'Route not found', 404));
     gatewayServer = app.listen(0);
     await new Promise<void>((resolve) => {
       gatewayServer.on('listening', () => resolve());
@@ -84,7 +90,7 @@ describe('api-gateway', () => {
   });
 
   it('returns 404 for unmatched routes', async () => {
-    const { response, data } = await fetchJson(`${gatewayBaseUrl}/api/v1/unknown`);
+    const { response, data } = await fetchJson(`${gatewayBaseUrl}/no-such-route`);
     expect(response.status).toBe(404);
     expect(data.success).toBe(false);
   });

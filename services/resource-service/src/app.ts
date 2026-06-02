@@ -15,6 +15,8 @@ import {
   sendError,
   sendSuccess,
   uuidParamSchema,
+  mountSwagger,
+  resourceOpenApi,
 } from '@shared/lib';
 import { env } from './config/env';
 import { z } from 'zod';
@@ -130,6 +132,12 @@ app.delete('/api/v1/resources/:id', authenticate, authorise('Admin'), validate(u
   if (!resources.deleteById(req.params.id)) throw new AppError('Resource not found', 404);
   sendSuccess(res, null, 'Resource deleted successfully');
 }));
+
+mountSwagger(app, {
+  serviceName: 'resource-service',
+  spec: resourceOpenApi,
+  disabled: env.DISABLE_SWAGGER === 'true',
+});
 
 app.use((_req, res) => sendError(res, 'Route not found', 404));
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

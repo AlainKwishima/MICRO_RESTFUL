@@ -15,6 +15,8 @@ import {
   sendError,
   sendSuccess,
   uuidParamSchema,
+  mountSwagger,
+  departmentOpenApi,
 } from '@shared/lib';
 import { env } from './config/env';
 import { z } from 'zod';
@@ -87,6 +89,12 @@ app.delete('/api/v1/departments/:id', authenticate, authorise('Admin'), validate
   if (!departments.deleteById(req.params.id)) throw new AppError('Department not found', 404);
   sendSuccess(res, null, 'Department deleted successfully');
 }));
+
+mountSwagger(app, {
+  serviceName: 'department-service',
+  spec: departmentOpenApi,
+  disabled: env.DISABLE_SWAGGER === 'true',
+});
 
 app.use((_req, res) => sendError(res, 'Route not found', 404));
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

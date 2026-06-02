@@ -9,6 +9,7 @@ const schema = z.object({
   USER_SERVICE_URL: z.string().url(),
   RESOURCE_SERVICE_URL: z.string().url(),
   NOTIFICATION_SERVICE_URL: z.string().url(),
+  DISABLE_SWAGGER: z.enum(['true', 'false']).default('false'),
 });
 
 export const env = loadEnv('transaction-service', schema);

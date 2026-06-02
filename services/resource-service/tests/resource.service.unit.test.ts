@@ -11,7 +11,7 @@ describe('resource-service', () => {
   beforeAll(async () => {
     process.env.PORT = '3005';
     process.env.NODE_ENV = 'test';
-    process.env.DATABASE_URL = 'postgresql://postgres:postgres@localhost:5432/test?schema=resources';
+    process.env.DATABASE_URL = 'postgresql://postgres:mukabareke@localhost:5432/test?schema=resources';
     process.env.JWT_SECRET = 'r'.repeat(32);
 
     const app = require('../src/app').default;

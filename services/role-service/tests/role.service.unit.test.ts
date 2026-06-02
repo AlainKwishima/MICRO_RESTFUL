@@ -10,7 +10,7 @@ describe('role-service', () => {
   beforeAll(async () => {
     process.env.PORT = '3003';
     process.env.NODE_ENV = 'test';
-    process.env.DATABASE_URL = 'postgresql://postgres:postgres@localhost:5432/test?schema=roles';
+    process.env.DATABASE_URL = 'postgresql://postgres:mukabareke@localhost:5432/test?schema=roles';
     process.env.JWT_SECRET = 'z'.repeat(32);
 
     const app = require('../src/app').default;
