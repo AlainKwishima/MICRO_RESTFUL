@@ -191,5 +191,3 @@ volumes:
 networks:
   microservices-network:
     driver: bridge
-    internal: true
-
