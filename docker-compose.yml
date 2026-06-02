@@ -1,19 +1,21 @@
 version: '3.9'
 
+x-service-common: &service-common
+  restart: unless-stopped
+  networks:
+    - microservices-network
+  depends_on:
+    db:
+      condition: service_healthy
+
 services:
-  # ─────────────────────────────────────────────────────────────────────────
-  # PostgreSQL 15 database
-  # ─────────────────────────────────────────────────────────────────────────
   db:
     image: postgres:15-alpine
-    container_name: institution_db
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-institution_db}
-    ports:
-      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -21,29 +23,173 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
+    networks:
+      - microservices-network
 
-  # ─────────────────────────────────────────────────────────────────────────
-  # API server
-  # ─────────────────────────────────────────────────────────────────────────
-  api:
+  auth-service:
+    <<: *service-common
     build:
       context: .
-      dockerfile: Dockerfile
-      target: runner
-    container_name: institution_api
-    restart: unless-stopped
-    env_file:
-      - .env
+      dockerfile: services/auth-service/Dockerfile
     environment:
-      # Override DATABASE_URL to point at the db service defined above
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-institution_db}?schema=public
-      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3001
+      NODE_ENV: ${NODE_ENV:-development}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-institution_db}?schema=auth
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ACCESS_EXPIRY: 15m
+      JWT_REFRESH_EXPIRY: 7d
+      CLIENT_URL: ${CLIENT_URL}
+      BREVO_API_KEY: ${BREVO_API_KEY}
+      BREVO_SENDER_EMAIL: ${BREVO_SENDER_EMAIL}
+      BREVO_SENDER_NAME: ${BREVO_SENDER_NAME}
+
+  user-service:
+    <<: *service-common
+    build:
+      context: .
+      dockerfile: services/user-service/Dockerfile
+    environment:
+      PORT: 3002
+      NODE_ENV: ${NODE_ENV:-development}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-institution_db}?schema=users
+      JWT_SECRET: ${JWT_SECRET}
+
+  role-service:
+    <<: *service-common
+    build:
+      context: .
+      dockerfile: services/role-service/Dockerfile
+    environment:
+      PORT: 3003
+      NODE_ENV: ${NODE_ENV:-development}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-institution_db}?schema=roles
+      JWT_SECRET: ${JWT_SECRET}
+
+  department-service:
+    <<: *service-common
+    build:
+      context: .
+      dockerfile: services/department-service/Dockerfile
+    environment:
+      PORT: 3004
+      NODE_ENV: ${NODE_ENV:-development}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-institution_db}?schema=departments
+      JWT_SECRET: ${JWT_SECRET}
+
+  resource-service:
+    <<: *service-common
+    build:
+      context: .
+      dockerfile: services/resource-service/Dockerfile
+    environment:
+      PORT: 3005
+      NODE_ENV: ${NODE_ENV:-development}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-institution_db}?schema=resources
+      JWT_SECRET: ${JWT_SECRET}
+
+  transaction-service:
+    <<: *service-common
+    build:
+      context: .
+      dockerfile: services/transaction-service/Dockerfile
+    environment:
+      PORT: 3006
+      NODE_ENV: ${NODE_ENV:-development}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-institution_db}?schema=transactions
+      JWT_SECRET: ${JWT_SECRET}
+      USER_SERVICE_URL: http://user-service:3002
+      RESOURCE_SERVICE_URL: http://resource-service:3005
+      NOTIFICATION_SERVICE_URL: http://notification-service:3007
+
+  notification-service:
+    <<: *service-common
+    build:
+      context: .
+      dockerfile: services/notification-service/Dockerfile
+    environment:
+      PORT: 3007
+      NODE_ENV: ${NODE_ENV:-development}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-institution_db}?schema=notifications
+      BREVO_API_KEY: ${BREVO_API_KEY}
+      BREVO_SENDER_EMAIL: ${BREVO_SENDER_EMAIL}
+      BREVO_SENDER_NAME: ${BREVO_SENDER_NAME}
+      CLIENT_URL: ${CLIENT_URL}
+
+  report-service:
+    <<: *service-common
+    build:
+      context: .
+      dockerfile: services/report-service/Dockerfile
+    environment:
+      PORT: 3008
+      NODE_ENV: ${NODE_ENV:-development}
+      JWT_SECRET: ${JWT_SECRET}
+      USER_SERVICE_URL: http://user-service:3002
+      RESOURCE_SERVICE_URL: http://resource-service:3005
+      TRANSACTION_SERVICE_URL: http://transaction-service:3006
+      DEPARTMENT_SERVICE_URL: http://department-service:3004
+
+  dashboard-service:
+    <<: *service-common
+    build:
+      context: .
+      dockerfile: services/dashboard-service/Dockerfile
+    environment:
+      PORT: 3009
+      NODE_ENV: ${NODE_ENV:-development}
+      JWT_SECRET: ${JWT_SECRET}
+      USER_SERVICE_URL: http://user-service:3002
+      RESOURCE_SERVICE_URL: http://resource-service:3005
+      TRANSACTION_SERVICE_URL: http://transaction-service:3006
+      DEPARTMENT_SERVICE_URL: http://department-service:3004
+
+  api-gateway:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
     ports:
-      - '${PORT:-3000}:${PORT:-3000}'
+      - '3000:3000'
     depends_on:
-      db:
+      auth-service:
         condition: service_healthy
+      user-service:
+        condition: service_healthy
+      role-service:
+        condition: service_healthy
+      department-service:
+        condition: service_healthy
+      resource-service:
+        condition: service_healthy
+      transaction-service:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
+      report-service:
+        condition: service_healthy
+      dashboard-service:
+        condition: service_healthy
+    environment:
+      PORT: 3000
+      NODE_ENV: ${NODE_ENV:-development}
+      AUTH_SERVICE_URL: http://auth-service:3001
+      USER_SERVICE_URL: http://user-service:3002
+      ROLE_SERVICE_URL: http://role-service:3003
+      DEPARTMENT_SERVICE_URL: http://department-service:3004
+      RESOURCE_SERVICE_URL: http://resource-service:3005
+      TRANSACTION_SERVICE_URL: http://transaction-service:3006
+      NOTIFICATION_SERVICE_URL: http://notification-service:3007
+      REPORT_SERVICE_URL: http://report-service:3008
+      DASHBOARD_SERVICE_URL: http://dashboard-service:3009
+    networks:
+      - microservices-network
 
 volumes:
   postgres_data:
-    driver: local
+
+networks:
+  microservices-network:
+    driver: bridge
+    internal: true
+
